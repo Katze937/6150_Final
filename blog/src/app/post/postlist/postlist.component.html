@@ -1,0 +1,36 @@
+<div class="post-list">
+    <h2>Blog Posts</h2>
+  
+    <!-- 搜索框 -->
+    <div class="search-box">
+      <input [(ngModel)]="searchQuery" placeholder="Search posts..." />
+      <button (click)="onSearch()">Search</button>
+    </div>
+  
+    <!-- 篩選標籤 -->
+    <div class="filters">
+      <label>Filter by Tags:</label>
+      <select (change)="onFilter($event.target.value)">
+        <option value="">All</option>
+        <option *ngFor="let tag of tags" [value]="tag">{{ tag }}</option>
+      </select>
+    </div>
+  
+    <!-- 顯示帖子列表 -->
+    <div class="post-cards">
+      <div *ngFor="let post of posts" class="post-card">
+        <h3>{{ post.title }}</h3>
+        <p>{{ post.body | slice: 0:100 }}...</p>
+        <p><small>{{ post.date | date }}</small></p>
+        <button (click)="onViewPost(post.id)">Read More</button>
+      </div>
+    </div>
+  
+    <!-- 分頁 -->
+    <pagination-controls 
+      (pageChange)="onPageChange($event)" 
+      [totalItems]="totalPosts" 
+      [itemsPerPage]="postsPerPage">
+    </pagination-controls>
+  </div>
+  

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { AuthService } from '../auth/auth.service';
-import { Router } from '@angular/router';
+//import { AuthService } from '../auth/auth.service';
+import { ApiService } from '../api.service';
 
 @Component({
   selector: 'app-login',
@@ -13,19 +13,34 @@ export class LoginComponent {
   password: string = '';
   message: string = '';
 
-  constructor(private authService: AuthService, private router: Router) {}
+  //constructor(private authService: AuthService) {}
+  constructor(private apiService: ApiService) {}
 
   onSubmit() {
-    this.authService.login(this.email, this.password).subscribe(
+    // 測試 API 請求
+    this.apiService.testLogin(this.email, this.password).subscribe(
       (response) => {
-        localStorage.setItem('token', response.token);  // 儲存 JWT
-        this.message = 'Login successful!';
-        this.router.navigate(['/profile']);  // 跳轉到用戶資料頁面
+        console.log('Login successful!', response);
+        // 在這裡處理登入成功的邏輯
       },
       (error) => {
-        alert('Login failed, please check your account or password.')
-        console.error('Login failed', error);
+        console.error('Login failed!', error);
       }
     );
   }
+
+
+  // onSubmit() {
+  //   this.authService.login(this.email, this.password).subscribe(
+  //     (response) => {
+  //       localStorage.setItem('token', response.token);  // 儲存 JWT
+  //       this.message = 'Login successful!';
+  //       this.router.navigate(['/profile']);  // 跳轉到用戶資料頁面
+  //     },
+  //     (error) => {
+  //       alert('Login failed, please check your account or password.')
+  //       console.error('Login failed', error);
+  //     }
+  //   );
+  // }
 }

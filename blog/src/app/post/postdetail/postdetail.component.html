@@ -1,0 +1,35 @@
+<h2>{{ post.title }}</h2>
+<p>{{ post.body }}</p>
+
+<button (click)="deletePost()">Delete Post</button>
+
+<!-- 添加評論表單 -->
+<form (ngSubmit)="addComment()">
+  <textarea [(ngModel)]="newCommentBody" name="commentBody" required></textarea>
+  <button type="submit">Add Comment</button>
+</form>
+
+<!-- 顯示評論及其回覆 -->
+<div *ngFor="let comment of post?.comments">
+  <div>{{ comment.body }}</div>
+  <button (click)="selectedParentCommentId = comment.id">Reply</button>
+  <div *ngFor="let reply of comment.replies">
+    <div>{{ reply.body }}</div>
+  </div>
+</div>
+
+<!-- 喜歡帖子按鈕 -->
+<button (click)="likePost()">Like</button>
+
+<!-- 搜索功能 -->
+<input [(ngModel)]="searchQuery" placeholder="Search posts..." />
+<button (click)="searchPosts()">Search</button>
+
+<!-- 顯示搜索結果 -->
+<div *ngIf="posts.length > 0">
+  <h3>Search Results:</h3>
+  <div *ngFor="let post of posts">
+    <h4>{{ post.title }}</h4>
+    <p>{{ post.body | slice:0:100 }}...</p>
+  </div>
+</div>

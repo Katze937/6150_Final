@@ -28,17 +28,12 @@ app.post('/api/register', async (req, res) => {
     const { email, password } = req.body;
   
     try {
-      // 檢查是否已經註冊過
       const userExists = await User.findOne({ email });
       if (userExists) {
         return res.status(400).json({ message: 'User already exists' });
       }
-  
-      // 創建新用戶
       const newUser = new User({ email, password });
       await newUser.save();
-  
-      // 生成 JWT Token
       const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
   
       res.status(201).json({ message: 'Registration Successful', token });
@@ -47,7 +42,6 @@ app.post('/api/register', async (req, res) => {
     }
   });
 
-  // 登入 API
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
   
@@ -56,14 +50,12 @@ app.post('/api/login', async (req, res) => {
       if (!user) {
         return res.status(400).json({ message: 'User does not exist' });
       }
-  
-      // 驗證密碼
+
       const isMatch = await user.matchPassword(password);
       if (!isMatch) {
         return res.status(400).json({ message: 'wrong password' });
       }
   
-      // 生成 JWT Token
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
   
       res.json({ message: 'Registration Successful', token });
@@ -72,12 +64,11 @@ app.post('/api/login', async (req, res) => {
     }
   });
   
-  // 登出 API
+
 app.post('/api/logout', (req, res) => {
     res.json({ message: 'Logout Successful' });
   });
 
-// 忘記密碼 API
 app.post('/api/forgot-password', async (req, res) => {
     const { email } = req.body;
   
@@ -93,8 +84,7 @@ app.post('/api/forgot-password', async (req, res) => {
       res.status(500).json({ message: 'Server Error', error });
     }
   });
-  
-  // 驗證 JWT 的中間件
+
 const protect = (req, res, next) => {
     const token = req.header('Authorization') && req.header('Authorization').split(' ')[1];
   
@@ -112,13 +102,86 @@ const protect = (req, res, next) => {
   };
   
   
-  app.get('/api/profile', protect, async (req, res) => {
-    console.log('Profile route accessed');
-    try {
-      const user = await User.findById(req.user.id); 
-      res.json(user); 
-    } catch (err) {
-      res.status(500).json({ message: 'Server Error', err });
+  // 1. 獲取單篇帖子的詳細信息
+app.get('/api/posts/:id', async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
     }
-  });
-  
+    res.json(post);
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error', error });
+  }
+});
+
+// 2. 刪除帖子
+app.delete('/api/posts/:id', async (req, res) => {
+  try {
+    const post = await Post.findByIdAndDelete(req.params.id);
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+    res.json({ message: 'Post deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error', error });
+  }
+});
+
+// 3. 添加評論
+app.post('/api/posts/:id/comments', async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    // 創建新評論
+    const newComment = {
+      body: req.body.body,
+      parentCommentId: req.body.parentCommentId || null,
+    };
+
+    post.comments.push(newComment); 
+    await post.save();
+
+    res.json(post);
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error', error });
+  }
+});
+
+// 4. 點贊帖子
+app.post('/api/posts/:id/like', async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    post.likes = (post.likes || 0) + 1;
+    await post.save();
+
+    res.json(post);
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error', error });
+  }
+});
+
+// 5. 搜索帖子
+app.get('/api/posts/search', async (req, res) => {
+  try {
+    const query = req.query.query;
+    const posts = await Post.find({
+      $or: [
+        { title: { $regex: query, $options: 'i' } },
+        { body: { $regex: query, $options: 'i' } },
+        { tags: { $in: [query] } }
+      ]
+    });
+
+    res.json(posts);
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error', error });
+  }
+});

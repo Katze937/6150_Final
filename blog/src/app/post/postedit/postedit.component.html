@@ -1,0 +1,13 @@
+<h2>Edit Post</h2>
+<form (ngSubmit)="onSubmit()">
+  <label for="title">Title</label>
+  <input type="text" id="title" [(ngModel)]="post.title" name="title" required>
+
+  <label for="body">Body</label>
+  <textarea id="body" [(ngModel)]="post.body" name="body" required></textarea>
+
+  <label for="tags">Tags</label>
+  <input type="text" id="tags" [(ngModel)]="post.tags" name="tags" placeholder="Comma separated tags">
+
+  <button type="submit">Update Post</button>
+</form>
