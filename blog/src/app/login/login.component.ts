@@ -1,12 +1,15 @@
 import { Component } from '@angular/core';
 //import { AuthService } from '../auth/auth.service';
 import { ApiService } from '../api.service';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
+  imports: [CommonModule, FormsModule]
 })
 export class LoginComponent {
   email: string = '';

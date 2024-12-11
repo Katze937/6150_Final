@@ -8,8 +8,9 @@ dotenv.config();
 const app = express();
 const port = 3000; //原本連線到5000現在被占用所以改3000
 const cors = require('cors');
+const path = require('path');
 app.use(cors());  // 允許所有域名的請求
-
+app.use(express.static(path.join(__dirname, 'dist/your-angular-app')));
 mongoose.connect('mongodb://127.0.0.1:27017/blog', { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('MongoDB Connected'))
   .catch(err => console.log('MongoDB connection error:', err));
@@ -19,6 +20,11 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.send('Hello, this is the Simple Blog API!');
 });
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist/your-angular-app/index.html'));
+});
+
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
